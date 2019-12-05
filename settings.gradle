@@ -1,0 +1,2 @@
+include ':app', ':inkoo'
+rootProject.name='inko'
