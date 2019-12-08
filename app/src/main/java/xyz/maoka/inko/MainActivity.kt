@@ -1,33 +1,27 @@
 package xyz.maoka.inko
 
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import xyz.maoka.inkoo.InkooBind
-import xyz.maoka.inkoo.InkooViewHolder
-import xyz.maoka.inkoo.create
+import xyz.maoka.inkoo.InkooActivity
+import xyz.maoka.inkoo.page
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : InkooActivity() {
+    override fun main() = page {
+        !"122"
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        findViewById<RecyclerView>(R.id.recyclerView).create{
-            layout = R.layout.item
-            size = { 20 }
-            bindView = {
-                val text = it.findViewById<TextView>(R.id.text)
-                this["text"] = text
-            }
-            bindData = {
-                (this["text"] as TextView).text = "index $it"
-            }
-        }
+        +"百无聊赖的你，收到了一封非注明发件人的信件"
+
+        -"拆开信封"{ openLetter() }
     }
 
+    private fun openLetter() = page {
+        +"尊敬的唐尼先生:"
+        +"恕我冒昧，谨定于本周末，鄙人将于lindsay古堡举行宴会，诚邀唐尼先生参加。如果先生不介意的话也可带上几位挚友。"
+        +"敬请光临"
+        +"马格纳斯伯爵"
+        -"重新翻看信封"{
+
+        }
+        -"直接将信封丢进垃圾桶"{
+
+        }
+    }
 }
