@@ -7,7 +7,19 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class InkooViewHolder(
+val data = ArrayList<InkooRaw>()
+
+var refresh: () -> Unit = {}
+
+var refreshTo: (Int) -> Unit = {}
+
+interface InkooRaw {
+    val layout: Int
+    val bindView: HashMap<String, View>.(View) -> Unit
+    val bindData: HashMap<String, View>.(Int) -> Unit
+}
+
+private class InkooViewHolder(
     view: View,
     bindView: HashMap<String, View>.(View) -> Unit,
     var map: HashMap<String, View> = HashMap()
@@ -15,37 +27,6 @@ class InkooViewHolder(
     init {
         bindView(map, view)
     }
-}
-
-class InkooBind(
-    var layout: Int = 0,
-    var size: () -> Int = { 0 },
-    var bindView: HashMap<String, View>.(View) -> Unit = {},
-    var bindData: HashMap<String, View>.(Int) -> Unit = {}
-)
-
-// useless
-fun RecyclerView.create(initial: InkooBind.() -> Unit) {
-    layoutManager = LinearLayoutManager(context)
-    val bind = InkooBind()
-    initial(bind)
-    adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, type: Int) = InkooViewHolder(
-            LayoutInflater.from(parent.context).inflate(bind.layout, parent, false),
-            bind.bindView
-        )
-
-        override fun getItemCount(): Int = bind.size()
-
-        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) =
-            bind.bindData((holder as InkooViewHolder).map, position)
-    }
-}
-
-interface InkooRaw {
-    val layout: Int
-    val bindView: HashMap<String, View>.(View) -> Unit
-    val bindData: HashMap<String, View>.(Int) -> Unit
 }
 
 private class InkooContent(
@@ -81,10 +62,10 @@ fun RecyclerView.create() {
     adapter = InkooAdapter(ArrayList(), SparseArray())
 }
 
-fun RecyclerView.refresh(rawData: ArrayList<InkooRaw>) {
+fun RecyclerView.refresh() {
     val contentList = ArrayList<InkooContent>()
     val typeList = SparseArray<InkooType>()
-    rawData.forEach {
+    data.forEach {
         val type = it::class.java.name.hashCode()
         typeList[type] ?: typeList.put(type, InkooType(it.layout, it.bindView))
         contentList.add(InkooContent(type, it.bindData))
@@ -94,3 +75,4 @@ fun RecyclerView.refresh(rawData: ArrayList<InkooRaw>) {
     inkooAdapter.typeList = typeList
     inkooAdapter.notifyDataSetChanged()
 }
+

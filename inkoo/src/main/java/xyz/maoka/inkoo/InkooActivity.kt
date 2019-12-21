@@ -1,42 +1,45 @@
 package xyz.maoka.inkoo
 
-import android.R.menu
 import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-
-abstract class InkooActivity : AppCompatActivity(), InkooView {
-
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var foreground: View
-    private val animatorTime = 360L
+abstract class InkooActivity : AppCompatActivity() {
 
     abstract fun main()
-
-    override fun recyclerView(): RecyclerView = recyclerView
-
-    override fun close(next: () -> Unit) {
-        ObjectAnimator.ofFloat(foreground, "alpha", 0F, 0.6F)
-            .setDuration(animatorTime).start();
-        Handler().postDelayed({ next() }, animatorTime)
-    }
-
-    override fun open() {
-        ObjectAnimator.ofFloat(foreground, "alpha", 0.6F, 0F)
-            .setDuration(animatorTime).start();
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_inkoo)
-        recyclerView = findViewById(R.id.recyclerView)
-        foreground = findViewById(R.id.foreground)
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
+        val foreground: View = findViewById(R.id.foreground)
+        data.clear()
+        val animate: (() -> Unit) -> Unit = {
+            foreground.visibility = View.VISIBLE
+            ObjectAnimator.ofFloat(foreground, "alpha", 0F, 0.6F)
+                .setDuration(800).start()
+            Handler().postDelayed({
+                it()
+                ObjectAnimator.ofFloat(foreground, "alpha", 0.6F, 0F)
+                    .setDuration(400).start();
+                Handler().postDelayed({ foreground.visibility = View.GONE }, 400)
+            }, 800)
+        }
+        refresh = { animate { recyclerView.refresh() } }
+        refreshTo = {
+            animate {
+                recyclerView.refresh()
+                recyclerView.scrollToPosition(it)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                layoutManager.scrollToPositionWithOffset(it, 0)
+            }
+        }
         recyclerView.create()
         main()
+        recyclerView.refresh()
     }
 }
