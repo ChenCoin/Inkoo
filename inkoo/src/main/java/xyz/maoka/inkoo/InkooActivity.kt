@@ -15,7 +15,7 @@ abstract class InkooActivity : AppCompatActivity(), Ink {
 
     override lateinit var recyclerView: RecyclerView
 
-    override val context: Context = this
+    override val activity = this
 
     private lateinit var foreground: View
 

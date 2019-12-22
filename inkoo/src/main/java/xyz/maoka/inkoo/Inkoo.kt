@@ -1,6 +1,6 @@
 package xyz.maoka.inkoo
 
-import android.content.Context
+import android.app.Activity
 import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +13,7 @@ interface Ink {
 
     val recyclerView: RecyclerView
 
-    val context: Context
+    val activity: Activity
 
     fun refresh()
 

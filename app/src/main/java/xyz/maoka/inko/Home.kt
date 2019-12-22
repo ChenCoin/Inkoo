@@ -1,5 +1,6 @@
 package xyz.maoka.inko
 
+import android.content.Intent
 import xyz.maoka.inkoo.*
 
 fun Ink.home() {
@@ -7,6 +8,10 @@ fun Ink.home() {
     +"百无聊赖的你，收到了一封非注明发件人的信件"
     -"拆开信封"{ openLetter() }
     +"再想想"{ openLetter() }
+    -"去吧"{
+        home()
+        activity.startActivity(Intent(activity, Field::class.java))
+    }
 }
 
 fun Ink.openLetter() {

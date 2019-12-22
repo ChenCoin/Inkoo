@@ -77,6 +77,4 @@ class Padding(value: Int) : InkooRaw {
     override val bindData: HashMap<String, View>.(Int) -> Unit = {}
 }
 
-fun padding(ink: Ink, item: Int) {
-    ink.data.add(Padding(item))
-}
+fun padding(ink: Ink, item: Int) = ink.data.add(Padding(item))
