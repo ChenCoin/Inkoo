@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,16 +35,22 @@ abstract class InkooActivity : AppCompatActivity(), Ink {
         }
     }
 
+    private val animTime: Long = 300
+
+    private fun startAnim(start: Float, end: Float) {
+        val anim = ObjectAnimator.ofFloat(foreground, "alpha", start, end)
+        anim.interpolator = AccelerateDecelerateInterpolator()
+        anim.setDuration(animTime).start()
+    }
+
     private fun animate(it: () -> Unit) {
         foreground.visibility = View.VISIBLE
-        ObjectAnimator.ofFloat(foreground, "alpha", 0F, 0.6F)
-            .setDuration(800).start()
+        startAnim(0F, 1F)
         Handler().postDelayed({
             it()
-            ObjectAnimator.ofFloat(foreground, "alpha", 0.6F, 0F)
-                .setDuration(400).start();
-            Handler().postDelayed({ foreground.visibility = View.GONE }, 400)
-        }, 800)
+            startAnim(1F, 0F)
+            Handler().postDelayed({ foreground.visibility = View.GONE }, animTime)
+        }, animTime)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
