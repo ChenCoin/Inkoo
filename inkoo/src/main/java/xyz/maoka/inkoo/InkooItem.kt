@@ -5,8 +5,6 @@ import android.widget.TextView
 import androidx.core.view.setPadding
 
 // !"" means title
-operator fun String.not() = data.add(Title(this))
-
 class Title(content: String) : InkooRaw {
     override val layout: Int = R.layout.item_title
     override val bindView: HashMap<String, View>.(View) -> Unit = {
@@ -17,9 +15,9 @@ class Title(content: String) : InkooRaw {
     }
 }
 
-// +"" means content
-operator fun String.unaryPlus() = data.add(Text(this))
+fun title(ink: Ink, content: String) = ink.data.add(Title(content))
 
+// +"" means content
 class Text(content: String) : InkooRaw {
     override val layout: Int = R.layout.item_text
     override val bindView: HashMap<String, View>.(View) -> Unit = {
@@ -29,6 +27,8 @@ class Text(content: String) : InkooRaw {
         (this["text"] as TextView).text = content
     }
 }
+
+fun text(ink: Ink, content: String) = ink.data.add(Text(content))
 
 // -""{} means button
 // +""{} means button with origin text
@@ -47,24 +47,24 @@ class Button(content: String, val tap: () -> Unit) : InkooRaw {
 
 operator fun String.invoke(event: () -> Unit) = Button(this, event)
 
-operator fun Button.unaryMinus() {
-    event = {
-        data.clear()
-        tap()
-        refresh()
+fun button(ink: Ink, item: Button) {
+    item.event = {
+        ink.data.clear()
+        item.tap()
+        ink.refresh()
     }
-    data.add(this)
+    ink.data.add(item)
 }
 
-operator fun Button.unaryPlus() {
-    event = {
-        val exist = data.filter { it !is Button }
-        data.clear()
-        data.addAll(exist)
-        tap()
-        refreshTo(exist.size)
+fun continueButton(ink: Ink, item: Button) {
+    item.event = {
+        val exist = ink.data.filter { it !is Button }
+        ink.data.clear()
+        ink.data.addAll(exist)
+        item.tap()
+        ink.refreshTo(exist.size)
     }
-    data.add(this)
+    ink.data.add(item)
 }
 
 // 16.dp() means 16dp padding
@@ -77,6 +77,6 @@ class Padding(value: Int) : InkooRaw {
     override val bindData: HashMap<String, View>.(Int) -> Unit = {}
 }
 
-val Int.dp get() = data.add(Padding(this))
-
-// 
+fun padding(ink: Ink, item: Int) {
+    ink.data.add(Padding(item))
+}

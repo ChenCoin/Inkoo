@@ -1,5 +1,6 @@
 package xyz.maoka.inkoo
 
+import android.content.Context
 import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
@@ -7,11 +8,27 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-val data = ArrayList<InkooRaw>()
+interface Ink {
+    val data: ArrayList<InkooRaw>
 
-var refresh: () -> Unit = {}
+    val recyclerView: RecyclerView
 
-var refreshTo: (Int) -> Unit = {}
+    val context: Context
+
+    fun refresh()
+
+    fun refreshTo(position: Int)
+
+    operator fun String.not() = title(this@Ink, this)
+
+    operator fun String.unaryPlus() = text(this@Ink, this)
+
+    operator fun Button.unaryMinus() = button(this@Ink, this)
+
+    operator fun Button.unaryPlus() = continueButton(this@Ink, this)
+
+    val Int.dp get() = padding(this@Ink, this)
+}
 
 interface InkooRaw {
     val layout: Int
@@ -40,20 +57,21 @@ private class InkooType(
 )
 
 private class InkooAdapter(
-    var contentList: ArrayList<InkooContent>,
-    var typeList: SparseArray<InkooType>
+    var contents: ArrayList<InkooContent>,
+    var types: SparseArray<InkooType>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    override fun getItemViewType(position: Int): Int = contentList[position].type
+    override fun getItemViewType(position: Int): Int = contents[position].type
 
-    override fun getItemCount(): Int = contentList.size
+    override fun getItemCount(): Int = contents.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, type: Int) = InkooViewHolder(
-        LayoutInflater.from(parent.context).inflate(typeList[type].layout, parent, false),
-        typeList[type].bindView
-    )
+    override fun onCreateViewHolder(parent: ViewGroup, type: Int): RecyclerView.ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val view = inflater.inflate(types[type].layout, parent, false)
+        return InkooViewHolder(view, types[type].bindView)
+    }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) =
-        contentList[position].bindData((holder as InkooViewHolder).map, position)
+        contents[position].bindData((holder as InkooViewHolder).map, position)
 }
 
 fun RecyclerView.create() {
@@ -62,7 +80,7 @@ fun RecyclerView.create() {
     adapter = InkooAdapter(ArrayList(), SparseArray())
 }
 
-fun RecyclerView.refresh() {
+fun Ink.notifyDataSetChanged() {
     val contentList = ArrayList<InkooContent>()
     val typeList = SparseArray<InkooType>()
     data.forEach {
@@ -70,9 +88,9 @@ fun RecyclerView.refresh() {
         typeList[type] ?: typeList.put(type, InkooType(it.layout, it.bindView))
         contentList.add(InkooContent(type, it.bindData))
     }
-    val inkooAdapter = (adapter as InkooAdapter)
-    inkooAdapter.contentList = contentList
-    inkooAdapter.typeList = typeList
+    val inkooAdapter = (recyclerView.adapter as InkooAdapter)
+    inkooAdapter.contents = contentList
+    inkooAdapter.types = typeList
     inkooAdapter.notifyDataSetChanged()
 }
 
